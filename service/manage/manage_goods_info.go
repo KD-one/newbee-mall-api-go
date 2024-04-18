@@ -2,6 +2,9 @@ package manage
 
 import (
 	"errors"
+	"strconv"
+	"time"
+
 	"gorm.io/gorm"
 	"main.go/global"
 	"main.go/model/common"
@@ -10,8 +13,6 @@ import (
 	"main.go/model/manage"
 	manageReq "main.go/model/manage/request"
 	"main.go/utils"
-	"strconv"
-	"time"
 )
 
 type ManageGoodsInfoService struct {
@@ -21,6 +22,9 @@ type ManageGoodsInfoService struct {
 func (m *ManageGoodsInfoService) CreateMallGoodsInfo(req manageReq.GoodsInfoAddParam) (err error) {
 	var goodsCategory manage.MallGoodsCategory
 	err = global.GVA_DB.Where("category_id=?  AND is_deleted=0", req.GoodsCategoryId).First(&goodsCategory).Error
+	if err != nil { // 新增错误处理
+		return
+	}
 	if goodsCategory.CategoryLevel != enum.LevelThree.Code() {
 		return errors.New("分类数据异常")
 	}

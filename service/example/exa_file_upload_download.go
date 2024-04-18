@@ -2,12 +2,13 @@ package example
 
 import (
 	"errors"
+	"mime/multipart"
+	"strings"
+
 	"main.go/global"
 	"main.go/model/common/request"
 	"main.go/model/example"
 	"main.go/utils/upload"
-	"mime/multipart"
-	"strings"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -81,7 +82,7 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 	oss := upload.NewOss()
 	filePath, key, uploadErr := oss.UploadFile(header)
 	if uploadErr != nil {
-		panic(err)
+		panic(uploadErr) // 如果使用panic(err) 此时的err没有获得报错信息，不够准确
 	}
 	if noSave == "0" {
 		s := strings.Split(header.Filename, ".")
