@@ -2,6 +2,9 @@ package manage
 
 import (
 	"errors"
+	"strconv"
+	"time"
+
 	"gorm.io/gorm"
 	"main.go/global"
 	"main.go/model/common"
@@ -9,8 +12,6 @@ import (
 	"main.go/model/manage"
 	manageReq "main.go/model/manage/request"
 	"main.go/utils"
-	"strconv"
-	"time"
 )
 
 type ManageIndexConfigService struct {
@@ -22,7 +23,7 @@ func (m *ManageIndexConfigService) CreateMallIndexConfig(req manageReq.MallIndex
 	if errors.Is(global.GVA_DB.Where("goods_id=?", req.GoodsId).First(&goodsInfo).Error, gorm.ErrRecordNotFound) {
 		return errors.New("商品不存在")
 	}
-	if errors.Is(global.GVA_DB.Where("config_type =? and goods_id=? and is_deleted=0", req.ConfigType, req.GoodsId).First(&manage.MallIndexConfig{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.GVA_DB.Where("config_type =? and goods_id=? and is_deleted=0", req.ConfigType, req.GoodsId).First(&manage.MallIndexConfig{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("已存在相同的首页配置项")
 	}
 	goodsId, _ := strconv.Atoi(req.GoodsId)
@@ -74,7 +75,7 @@ func (m *ManageIndexConfigService) UpdateMallIndexConfig(req manageReq.MallIndex
 	}
 	var newIndexConfig manage.MallIndexConfig
 	err = global.GVA_DB.Where("config_type=? and goods_id=?", mallIndexConfig.ConfigType, mallIndexConfig.GoodsId).First(&newIndexConfig).Error
-	if err != nil && newIndexConfig.ConfigId == mallIndexConfig.ConfigId {
+	if err == nil && newIndexConfig.ConfigId == mallIndexConfig.ConfigId {
 		return errors.New("已存在相同的首页配置项")
 	}
 	err = global.GVA_DB.Where("config_id=?", mallIndexConfig.ConfigId).Updates(&mallIndexConfig).Error
